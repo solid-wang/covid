@@ -1,0 +1,40 @@
+---
+apiVersion: example/v1
+kind: Demo1
+metadata:
+  name: demo
+spec:
+  v1: werasdf
+
+---
+apiVersion: group/v1
+kind: Demo
+metadata:
+  name: demo
+  namespace: aaa
+  labels:
+    project: a
+spec:
+  v1: adferwer
+
+---
+apiVersion: group/v1
+kind: Demo
+metadata:
+  name: demo123
+  namespace: aaa
+  labels:
+    project: v
+spec:
+  v1: wer
+
+---
+apiVersion: group/v1beta1
+kind: Demo
+metadata:
+  name: demo
+  namespace: bbb
+  labels:
+    project: b
+spec:
+  v1beta1: adfd
