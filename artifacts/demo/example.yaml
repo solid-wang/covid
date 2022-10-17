@@ -1,0 +1,7 @@
+---
+apiVersion: example/v1
+kind: Demo1
+metadata:
+  name: demo
+spec:
+  v1: werasdf

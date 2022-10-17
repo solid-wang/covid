@@ -14,7 +14,7 @@ type DemoList struct {
 
 // DemoSpec is the specification of a Demo.
 type DemoSpec struct {
-	V1beta1 string `json:"v1beta1,omitempty" protobuf:"bytes,1,opt,name=v1beta1"`
+	V1 string `json:"v1,omitempty" protobuf:"bytes,1,opt,name=v1beta1"`
 }
 
 // DemoStatus is the status of a Demo.

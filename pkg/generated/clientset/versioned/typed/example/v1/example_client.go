@@ -20,8 +20,8 @@ type ExampleV1Client struct {
 	restClient rest.Interface
 }
 
-func (c *ExampleV1Client) Demo1s(namespace string) Demo1Interface {
-	return newDemo1s(c, namespace)
+func (c *ExampleV1Client) Demo1s() Demo1Interface {
+	return newDemo1s(c)
 }
 
 // NewForConfig creates a new ExampleV1Client for the given config.

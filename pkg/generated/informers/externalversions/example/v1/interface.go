@@ -25,5 +25,5 @@ func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakList
 
 // Demo1s returns a Demo1Informer.
 func (v *version) Demo1s() Demo1Informer {
-	return &demo1Informer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+	return &demo1Informer{factory: v.factory, tweakListOptions: v.tweakListOptions}
 }

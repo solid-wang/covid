@@ -1,7 +1,8 @@
-package server
+package app
 
 import (
 	"context"
+	corev1 "github.com/solid-wang/covid/pkg/apis/core/v1"
 	examplev1 "github.com/solid-wang/covid/pkg/apis/example/v1"
 	groupv1 "github.com/solid-wang/covid/pkg/apis/group/v1"
 	groupv1beta1 "github.com/solid-wang/covid/pkg/apis/group/v1beta1"
@@ -38,6 +39,7 @@ type CovidServerOptions struct {
 func NewCovidServerOptions(out, errOut io.Writer) *CovidServerOptions {
 
 	groupVersioners := schema.GroupVersions{
+		corev1.SchemeGroupVersion,
 		examplev1.SchemeGroupVersion,
 		groupv1.SchemeGroupVersion,
 		groupv1beta1.SchemeGroupVersion,

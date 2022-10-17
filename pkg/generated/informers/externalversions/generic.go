@@ -5,7 +5,8 @@ package externalversions
 import (
 	"fmt"
 
-	v1 "github.com/solid-wang/covid/pkg/apis/example/v1"
+	v1 "github.com/solid-wang/covid/pkg/apis/core/v1"
+	examplev1 "github.com/solid-wang/covid/pkg/apis/example/v1"
 	groupv1 "github.com/solid-wang/covid/pkg/apis/group/v1"
 	v1beta1 "github.com/solid-wang/covid/pkg/apis/group/v1beta1"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
@@ -38,8 +39,14 @@ func (f *genericInformer) Lister() cache.GenericLister {
 // TODO extend this to unknown resources with a client pool
 func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource) (GenericInformer, error) {
 	switch resource {
-	// Group=example, Version=v1
-	case v1.SchemeGroupVersion.WithResource("demo1s"):
+	// Group=core, Version=v1
+	case v1.SchemeGroupVersion.WithResource("events"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Core().V1().Events().Informer()}, nil
+	case v1.SchemeGroupVersion.WithResource("namespaces"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Core().V1().Namespaces().Informer()}, nil
+
+		// Group=example, Version=v1
+	case examplev1.SchemeGroupVersion.WithResource("demo1s"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Example().V1().Demo1s().Informer()}, nil
 
 		// Group=group, Version=v1

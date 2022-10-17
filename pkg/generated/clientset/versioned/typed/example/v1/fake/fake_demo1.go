@@ -17,7 +17,6 @@ import (
 // FakeDemo1s implements Demo1Interface
 type FakeDemo1s struct {
 	Fake *FakeExampleV1
-	ns   string
 }
 
 var demo1sResource = schema.GroupVersionResource{Group: "example", Version: "v1", Resource: "demo1s"}
@@ -27,8 +26,7 @@ var demo1sKind = schema.GroupVersionKind{Group: "example", Version: "v1", Kind: 
 // Get takes name of the demo1, and returns the corresponding demo1 object, and an error if there is any.
 func (c *FakeDemo1s) Get(ctx context.Context, name string, options v1.GetOptions) (result *examplev1.Demo1, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewGetAction(demo1sResource, c.ns, name), &examplev1.Demo1{})
-
+		Invokes(testing.NewRootGetAction(demo1sResource, name), &examplev1.Demo1{})
 	if obj == nil {
 		return nil, err
 	}
@@ -38,8 +36,7 @@ func (c *FakeDemo1s) Get(ctx context.Context, name string, options v1.GetOptions
 // List takes label and field selectors, and returns the list of Demo1s that match those selectors.
 func (c *FakeDemo1s) List(ctx context.Context, opts v1.ListOptions) (result *examplev1.Demo1List, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewListAction(demo1sResource, demo1sKind, c.ns, opts), &examplev1.Demo1List{})
-
+		Invokes(testing.NewRootListAction(demo1sResource, demo1sKind, opts), &examplev1.Demo1List{})
 	if obj == nil {
 		return nil, err
 	}
@@ -60,15 +57,13 @@ func (c *FakeDemo1s) List(ctx context.Context, opts v1.ListOptions) (result *exa
 // Watch returns a watch.Interface that watches the requested demo1s.
 func (c *FakeDemo1s) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 	return c.Fake.
-		InvokesWatch(testing.NewWatchAction(demo1sResource, c.ns, opts))
-
+		InvokesWatch(testing.NewRootWatchAction(demo1sResource, opts))
 }
 
 // Create takes the representation of a demo1 and creates it.  Returns the server's representation of the demo1, and an error, if there is any.
 func (c *FakeDemo1s) Create(ctx context.Context, demo1 *examplev1.Demo1, opts v1.CreateOptions) (result *examplev1.Demo1, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewCreateAction(demo1sResource, c.ns, demo1), &examplev1.Demo1{})
-
+		Invokes(testing.NewRootCreateAction(demo1sResource, demo1), &examplev1.Demo1{})
 	if obj == nil {
 		return nil, err
 	}
@@ -78,8 +73,7 @@ func (c *FakeDemo1s) Create(ctx context.Context, demo1 *examplev1.Demo1, opts v1
 // Update takes the representation of a demo1 and updates it. Returns the server's representation of the demo1, and an error, if there is any.
 func (c *FakeDemo1s) Update(ctx context.Context, demo1 *examplev1.Demo1, opts v1.UpdateOptions) (result *examplev1.Demo1, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewUpdateAction(demo1sResource, c.ns, demo1), &examplev1.Demo1{})
-
+		Invokes(testing.NewRootUpdateAction(demo1sResource, demo1), &examplev1.Demo1{})
 	if obj == nil {
 		return nil, err
 	}
@@ -90,8 +84,7 @@ func (c *FakeDemo1s) Update(ctx context.Context, demo1 *examplev1.Demo1, opts v1
 // Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
 func (c *FakeDemo1s) UpdateStatus(ctx context.Context, demo1 *examplev1.Demo1, opts v1.UpdateOptions) (*examplev1.Demo1, error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewUpdateSubresourceAction(demo1sResource, "status", c.ns, demo1), &examplev1.Demo1{})
-
+		Invokes(testing.NewRootUpdateSubresourceAction(demo1sResource, "status", demo1), &examplev1.Demo1{})
 	if obj == nil {
 		return nil, err
 	}
@@ -101,14 +94,13 @@ func (c *FakeDemo1s) UpdateStatus(ctx context.Context, demo1 *examplev1.Demo1, o
 // Delete takes name of the demo1 and deletes it. Returns an error if one occurs.
 func (c *FakeDemo1s) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
-		Invokes(testing.NewDeleteActionWithOptions(demo1sResource, c.ns, name, opts), &examplev1.Demo1{})
-
+		Invokes(testing.NewRootDeleteActionWithOptions(demo1sResource, name, opts), &examplev1.Demo1{})
 	return err
 }
 
 // DeleteCollection deletes a collection of objects.
 func (c *FakeDemo1s) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
-	action := testing.NewDeleteCollectionAction(demo1sResource, c.ns, listOpts)
+	action := testing.NewRootDeleteCollectionAction(demo1sResource, listOpts)
 
 	_, err := c.Fake.Invokes(action, &examplev1.Demo1List{})
 	return err
@@ -117,8 +109,7 @@ func (c *FakeDemo1s) DeleteCollection(ctx context.Context, opts v1.DeleteOptions
 // Patch applies the patch and returns the patched demo1.
 func (c *FakeDemo1s) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *examplev1.Demo1, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(demo1sResource, c.ns, name, pt, data, subresources...), &examplev1.Demo1{})
-
+		Invokes(testing.NewRootPatchSubresourceAction(demo1sResource, name, pt, data, subresources...), &examplev1.Demo1{})
 	if obj == nil {
 		return nil, err
 	}

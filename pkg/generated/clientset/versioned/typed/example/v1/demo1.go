@@ -17,7 +17,7 @@ import (
 // Demo1sGetter has a method to return a Demo1Interface.
 // A group's client should implement this interface.
 type Demo1sGetter interface {
-	Demo1s(namespace string) Demo1Interface
+	Demo1s() Demo1Interface
 }
 
 // Demo1Interface has methods to work with Demo1 resources.
@@ -37,14 +37,12 @@ type Demo1Interface interface {
 // demo1s implements Demo1Interface
 type demo1s struct {
 	client rest.Interface
-	ns     string
 }
 
 // newDemo1s returns a Demo1s
-func newDemo1s(c *ExampleV1Client, namespace string) *demo1s {
+func newDemo1s(c *ExampleV1Client) *demo1s {
 	return &demo1s{
 		client: c.RESTClient(),
-		ns:     namespace,
 	}
 }
 
@@ -52,7 +50,6 @@ func newDemo1s(c *ExampleV1Client, namespace string) *demo1s {
 func (c *demo1s) Get(ctx context.Context, name string, options metav1.GetOptions) (result *v1.Demo1, err error) {
 	result = &v1.Demo1{}
 	err = c.client.Get().
-		Namespace(c.ns).
 		Resource("demo1s").
 		Name(name).
 		VersionedParams(&options, scheme.ParameterCodec).
@@ -69,7 +66,6 @@ func (c *demo1s) List(ctx context.Context, opts metav1.ListOptions) (result *v1.
 	}
 	result = &v1.Demo1List{}
 	err = c.client.Get().
-		Namespace(c.ns).
 		Resource("demo1s").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
@@ -86,7 +82,6 @@ func (c *demo1s) Watch(ctx context.Context, opts metav1.ListOptions) (watch.Inte
 	}
 	opts.Watch = true
 	return c.client.Get().
-		Namespace(c.ns).
 		Resource("demo1s").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
@@ -97,7 +92,6 @@ func (c *demo1s) Watch(ctx context.Context, opts metav1.ListOptions) (watch.Inte
 func (c *demo1s) Create(ctx context.Context, demo1 *v1.Demo1, opts metav1.CreateOptions) (result *v1.Demo1, err error) {
 	result = &v1.Demo1{}
 	err = c.client.Post().
-		Namespace(c.ns).
 		Resource("demo1s").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(demo1).
@@ -110,7 +104,6 @@ func (c *demo1s) Create(ctx context.Context, demo1 *v1.Demo1, opts metav1.Create
 func (c *demo1s) Update(ctx context.Context, demo1 *v1.Demo1, opts metav1.UpdateOptions) (result *v1.Demo1, err error) {
 	result = &v1.Demo1{}
 	err = c.client.Put().
-		Namespace(c.ns).
 		Resource("demo1s").
 		Name(demo1.Name).
 		VersionedParams(&opts, scheme.ParameterCodec).
@@ -125,7 +118,6 @@ func (c *demo1s) Update(ctx context.Context, demo1 *v1.Demo1, opts metav1.Update
 func (c *demo1s) UpdateStatus(ctx context.Context, demo1 *v1.Demo1, opts metav1.UpdateOptions) (result *v1.Demo1, err error) {
 	result = &v1.Demo1{}
 	err = c.client.Put().
-		Namespace(c.ns).
 		Resource("demo1s").
 		Name(demo1.Name).
 		SubResource("status").
@@ -139,7 +131,6 @@ func (c *demo1s) UpdateStatus(ctx context.Context, demo1 *v1.Demo1, opts metav1.
 // Delete takes name of the demo1 and deletes it. Returns an error if one occurs.
 func (c *demo1s) Delete(ctx context.Context, name string, opts metav1.DeleteOptions) error {
 	return c.client.Delete().
-		Namespace(c.ns).
 		Resource("demo1s").
 		Name(name).
 		Body(&opts).
@@ -154,7 +145,6 @@ func (c *demo1s) DeleteCollection(ctx context.Context, opts metav1.DeleteOptions
 		timeout = time.Duration(*listOpts.TimeoutSeconds) * time.Second
 	}
 	return c.client.Delete().
-		Namespace(c.ns).
 		Resource("demo1s").
 		VersionedParams(&listOpts, scheme.ParameterCodec).
 		Timeout(timeout).
@@ -167,7 +157,6 @@ func (c *demo1s) DeleteCollection(ctx context.Context, opts metav1.DeleteOptions
 func (c *demo1s) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts metav1.PatchOptions, subresources ...string) (result *v1.Demo1, err error) {
 	result = &v1.Demo1{}
 	err = c.client.Patch(pt).
-		Namespace(c.ns).
 		Resource("demo1s").
 		Name(name).
 		SubResource(subresources...).

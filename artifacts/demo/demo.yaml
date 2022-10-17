@@ -15,7 +15,7 @@ metadata:
   labels:
     project: a
 spec:
-  v1: adferwer
+  v1: adfer332
 
 ---
 apiVersion: group/v1

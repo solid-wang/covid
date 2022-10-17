@@ -25,17 +25,23 @@ CODEGEN_PKG=${CODEGEN_PKG:-$(cd "${SCRIPT_ROOT}"; ls -d -1 ./vendor/k8s.io/code-
 # --output-base    because this script should also be able to run inside the vendor dir of
 #                  k8s.io/kubernetes. The output-base is needed for the generators to output into the vendor dir
 #                  instead of the $GOPATH directly. For normal projects this can be dropped.
+
+
 bash "${CODEGEN_PKG}"/generate-internal-groups.sh "deepcopy,defaulter,conversion,openapi" \
   github.com/solid-wang/covid/pkg/generated github.com/solid-wang/covid/pkg/apis github.com/solid-wang/covid/pkg/apis \
-  "example:v1 group:v1,v1beta1" \
+  "example:v1 group:v1,v1beta1 core:v1" \
   --output-base "$(dirname "${BASH_SOURCE[0]}")/../../../.." \
   --go-header-file "${SCRIPT_ROOT}"/hack/boilerplate.go.txt
 
 bash "${CODEGEN_PKG}"/generate-groups.sh all \
   github.com/solid-wang/covid/pkg/generated github.com/solid-wang/covid/pkg/apis \
-  "example:v1 group:v1,v1beta1" \
+  "example:v1 group:v1,v1beta1 core:v1" \
   --output-base "$(dirname "${BASH_SOURCE[0]}")/../../../.." \
   --go-header-file "${SCRIPT_ROOT}"/hack/boilerplate.go.txt
 
 # To use your own boilerplate text append:
 #   --go-header-file "${SCRIPT_ROOT}"/hack/custom-boilerplate.go.txt
+
+# patch
+#rm -f "${SCRIPT_ROOT}"/pkg/generated/clientset/versioned/typed/core/v1/generated_expansion.go
+cp -f "${SCRIPT_ROOT}"/hack/patch/event_expansion "${SCRIPT_ROOT}"/pkg/generated/clientset/versioned/typed/core/v1/generated_expansion.go

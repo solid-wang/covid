@@ -23,6 +23,7 @@ type Demo1Status struct {
 
 // +genclient
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +genclient:nonNamespaced
 
 // Demo1 is a demo type with a spec and a status.
 type Demo1 struct {

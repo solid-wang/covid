@@ -3,6 +3,7 @@
 package scheme
 
 import (
+	corev1 "github.com/solid-wang/covid/pkg/apis/core/v1"
 	examplev1 "github.com/solid-wang/covid/pkg/apis/example/v1"
 	groupv1 "github.com/solid-wang/covid/pkg/apis/group/v1"
 	groupv1beta1 "github.com/solid-wang/covid/pkg/apis/group/v1beta1"
@@ -17,6 +18,7 @@ var Scheme = runtime.NewScheme()
 var Codecs = serializer.NewCodecFactory(Scheme)
 var ParameterCodec = runtime.NewParameterCodec(Scheme)
 var localSchemeBuilder = runtime.SchemeBuilder{
+	corev1.AddToScheme,
 	examplev1.AddToScheme,
 	groupv1.AddToScheme,
 	groupv1beta1.AddToScheme,

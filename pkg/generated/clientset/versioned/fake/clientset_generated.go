@@ -4,6 +4,8 @@ package fake
 
 import (
 	clientset "github.com/solid-wang/covid/pkg/generated/clientset/versioned"
+	corev1 "github.com/solid-wang/covid/pkg/generated/clientset/versioned/typed/core/v1"
+	fakecorev1 "github.com/solid-wang/covid/pkg/generated/clientset/versioned/typed/core/v1/fake"
 	examplev1 "github.com/solid-wang/covid/pkg/generated/clientset/versioned/typed/example/v1"
 	fakeexamplev1 "github.com/solid-wang/covid/pkg/generated/clientset/versioned/typed/example/v1/fake"
 	groupv1 "github.com/solid-wang/covid/pkg/generated/clientset/versioned/typed/group/v1"
@@ -66,6 +68,11 @@ var (
 	_ clientset.Interface = &Clientset{}
 	_ testing.FakeClient  = &Clientset{}
 )
+
+// CoreV1 retrieves the CoreV1Client
+func (c *Clientset) CoreV1() corev1.CoreV1Interface {
+	return &fakecorev1.FakeCoreV1{Fake: &c.Fake}
+}
 
 // ExampleV1 retrieves the ExampleV1Client
 func (c *Clientset) ExampleV1() examplev1.ExampleV1Interface {

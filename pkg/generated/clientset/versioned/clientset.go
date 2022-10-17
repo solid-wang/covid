@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
+	corev1 "github.com/solid-wang/covid/pkg/generated/clientset/versioned/typed/core/v1"
 	examplev1 "github.com/solid-wang/covid/pkg/generated/clientset/versioned/typed/example/v1"
 	groupv1 "github.com/solid-wang/covid/pkg/generated/clientset/versioned/typed/group/v1"
 	groupv1beta1 "github.com/solid-wang/covid/pkg/generated/clientset/versioned/typed/group/v1beta1"
@@ -16,6 +17,7 @@ import (
 
 type Interface interface {
 	Discovery() discovery.DiscoveryInterface
+	CoreV1() corev1.CoreV1Interface
 	ExampleV1() examplev1.ExampleV1Interface
 	GroupV1() groupv1.GroupV1Interface
 	GroupV1beta1() groupv1beta1.GroupV1beta1Interface
@@ -25,9 +27,15 @@ type Interface interface {
 // version included in a Clientset.
 type Clientset struct {
 	*discovery.DiscoveryClient
+	coreV1       *corev1.CoreV1Client
 	exampleV1    *examplev1.ExampleV1Client
 	groupV1      *groupv1.GroupV1Client
 	groupV1beta1 *groupv1beta1.GroupV1beta1Client
+}
+
+// CoreV1 retrieves the CoreV1Client
+func (c *Clientset) CoreV1() corev1.CoreV1Interface {
+	return c.coreV1
 }
 
 // ExampleV1 retrieves the ExampleV1Client
@@ -89,6 +97,10 @@ func NewForConfigAndClient(c *rest.Config, httpClient *http.Client) (*Clientset,
 
 	var cs Clientset
 	var err error
+	cs.coreV1, err = corev1.NewForConfigAndClient(&configShallowCopy, httpClient)
+	if err != nil {
+		return nil, err
+	}
 	cs.exampleV1, err = examplev1.NewForConfigAndClient(&configShallowCopy, httpClient)
 	if err != nil {
 		return nil, err
@@ -122,6 +134,7 @@ func NewForConfigOrDie(c *rest.Config) *Clientset {
 // New creates a new Clientset for the given RESTClient.
 func New(c rest.Interface) *Clientset {
 	var cs Clientset
+	cs.coreV1 = corev1.New(c)
 	cs.exampleV1 = examplev1.New(c)
 	cs.groupV1 = groupv1.New(c)
 	cs.groupV1beta1 = groupv1beta1.New(c)

@@ -5,7 +5,3 @@ package v1
 // Demo1ListerExpansion allows custom methods to be added to
 // Demo1Lister.
 type Demo1ListerExpansion interface{}
-
-// Demo1NamespaceListerExpansion allows custom methods to be added to
-// Demo1NamespaceLister.
-type Demo1NamespaceListerExpansion interface{}

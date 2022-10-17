@@ -1,19 +1,23 @@
 package apiserver
 
 import (
+	"github.com/solid-wang/covid/pkg/apis/core"
+	coreinstall "github.com/solid-wang/covid/pkg/apis/core/install"
 	"github.com/solid-wang/covid/pkg/apis/example"
-	exampleInstall "github.com/solid-wang/covid/pkg/apis/example/install"
+	exampleinstall "github.com/solid-wang/covid/pkg/apis/example/install"
 	"github.com/solid-wang/covid/pkg/apis/group"
-	groupInstall "github.com/solid-wang/covid/pkg/apis/group/install"
+	groupinstall "github.com/solid-wang/covid/pkg/apis/group/install"
+	eventstorage "github.com/solid-wang/covid/pkg/registry/core/event"
+	namespacestorage "github.com/solid-wang/covid/pkg/registry/core/namespace"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/serializer"
 
 	"github.com/solid-wang/covid/pkg/registry"
 	demo1storage "github.com/solid-wang/covid/pkg/registry/example/demo1"
 	demostorage "github.com/solid-wang/covid/pkg/registry/group/demo"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/apimachinery/pkg/version"
 	"k8s.io/apiserver/pkg/registry/rest"
 	genericapiserver "k8s.io/apiserver/pkg/server"
@@ -28,8 +32,9 @@ var (
 )
 
 func init() {
-	exampleInstall.Install(Scheme)
-	groupInstall.Install(Scheme)
+	coreinstall.Install(Scheme)
+	exampleinstall.Install(Scheme)
+	groupinstall.Install(Scheme)
 
 	// we need to add the options to empty v1
 	// TODO fix the server code to avoid this
@@ -96,6 +101,17 @@ func (c completedConfig) New() (*CovidServer, error) {
 
 	s := &CovidServer{
 		GenericAPIServer: genericServer,
+	}
+
+	coreGroupInfo := genericapiserver.NewDefaultAPIGroupInfo(core.GroupName, Scheme, metav1.ParameterCodec, Codecs)
+
+	coreGroupInfo.VersionedResourcesStorageMap["v1"] = map[string]rest.Storage{
+		"namespaces": registry.RESTInPeace(namespacestorage.NewREST(Scheme, c.GenericConfig.RESTOptionsGetter)),
+		"events":     registry.RESTInPeace(eventstorage.NewREST(Scheme, c.GenericConfig.RESTOptionsGetter)),
+	}
+
+	if err := s.GenericAPIServer.InstallLegacyAPIGroup("/api", &coreGroupInfo); err != nil {
+		return nil, err
 	}
 
 	exampleGroupInfo := genericapiserver.NewDefaultAPIGroupInfo(example.GroupName, Scheme, metav1.ParameterCodec, Codecs)

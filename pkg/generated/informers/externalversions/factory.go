@@ -8,6 +8,7 @@ import (
 	time "time"
 
 	versioned "github.com/solid-wang/covid/pkg/generated/clientset/versioned"
+	core "github.com/solid-wang/covid/pkg/generated/informers/externalversions/core"
 	example "github.com/solid-wang/covid/pkg/generated/informers/externalversions/example"
 	group "github.com/solid-wang/covid/pkg/generated/informers/externalversions/group"
 	internalinterfaces "github.com/solid-wang/covid/pkg/generated/informers/externalversions/internalinterfaces"
@@ -157,8 +158,13 @@ type SharedInformerFactory interface {
 	ForResource(resource schema.GroupVersionResource) (GenericInformer, error)
 	WaitForCacheSync(stopCh <-chan struct{}) map[reflect.Type]bool
 
+	Core() core.Interface
 	Example() example.Interface
 	Group() group.Interface
+}
+
+func (f *sharedInformerFactory) Core() core.Interface {
+	return core.New(f, f.namespace, f.tweakListOptions)
 }
 
 func (f *sharedInformerFactory) Example() example.Interface {

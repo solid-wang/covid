@@ -15,8 +15,9 @@ type Demo1Lister interface {
 	// List lists all Demo1s in the indexer.
 	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1.Demo1, err error)
-	// Demo1s returns an object that can list and get Demo1s.
-	Demo1s(namespace string) Demo1NamespaceLister
+	// Get retrieves the Demo1 from the index for a given name.
+	// Objects returned here must be treated as read-only.
+	Get(name string) (*v1.Demo1, error)
 	Demo1ListerExpansion
 }
 
@@ -38,41 +39,9 @@ func (s *demo1Lister) List(selector labels.Selector) (ret []*v1.Demo1, err error
 	return ret, err
 }
 
-// Demo1s returns an object that can list and get Demo1s.
-func (s *demo1Lister) Demo1s(namespace string) Demo1NamespaceLister {
-	return demo1NamespaceLister{indexer: s.indexer, namespace: namespace}
-}
-
-// Demo1NamespaceLister helps list and get Demo1s.
-// All objects returned here must be treated as read-only.
-type Demo1NamespaceLister interface {
-	// List lists all Demo1s in the indexer for a given namespace.
-	// Objects returned here must be treated as read-only.
-	List(selector labels.Selector) (ret []*v1.Demo1, err error)
-	// Get retrieves the Demo1 from the indexer for a given namespace and name.
-	// Objects returned here must be treated as read-only.
-	Get(name string) (*v1.Demo1, error)
-	Demo1NamespaceListerExpansion
-}
-
-// demo1NamespaceLister implements the Demo1NamespaceLister
-// interface.
-type demo1NamespaceLister struct {
-	indexer   cache.Indexer
-	namespace string
-}
-
-// List lists all Demo1s in the indexer for a given namespace.
-func (s demo1NamespaceLister) List(selector labels.Selector) (ret []*v1.Demo1, err error) {
-	err = cache.ListAllByNamespace(s.indexer, s.namespace, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1.Demo1))
-	})
-	return ret, err
-}
-
-// Get retrieves the Demo1 from the indexer for a given namespace and name.
-func (s demo1NamespaceLister) Get(name string) (*v1.Demo1, error) {
-	obj, exists, err := s.indexer.GetByKey(s.namespace + "/" + name)
+// Get retrieves the Demo1 from the index for a given name.
+func (s *demo1Lister) Get(name string) (*v1.Demo1, error) {
+	obj, exists, err := s.indexer.GetByKey(name)
 	if err != nil {
 		return nil, err
 	}
