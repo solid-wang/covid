@@ -1,0 +1,73 @@
+---
+apiVersion: app/v1
+kind: Application
+metadata:
+  name: goweb
+  namespace: devops
+spec:
+  gitlabName: gitlab.ssc-hn.com
+  projectID: 331
+  dockerRepositoryName: docker.ssc-hn.com
+  branchEnvMap:
+    main: dev
+    test: test
+  continuousIntegrationTemplate:
+    configPath: ".gitlab-ci.yml@ops/go-ci"
+    buildImage: "golang:latest"
+    fromImage: "ubuntu:22.04"
+    buildDir: "./"
+    buildCommand: "export GOPROXY=https://goproxy.cn,direct && go build -o ./goweb"
+    artifactPath: "./goweb"
+  continuousDeploymentTemplate:
+    command:
+      - "goweb"
+    ports:
+      - name: web
+        port: 80
+        targetPort: 8080
+    envMap:
+      dev:
+        approval: false
+        replicas: 1
+        variables:
+          - key: env
+            value: dev
+          - key: product
+            value: devops
+        kubernetesName: solidk8s
+        kubernetesNamespace: goweb-dev
+        configMap:
+          default.conf: |-
+            dlsfjalkejrlkajelfj
+            awerawejfka;lwekjrlkwe
+            afalkwejrklajwelrjawe
+            weklrjlwekfjlkew
+          default1.conf: |-
+            kdjaflkwejkfnaek
+            aelfnalkewfjkalwe
+            klaenflakewjfkla
+            kejflakwejflkaejklfajewlkfjalw
+        configMountPath: /etc/config
+      test:
+        approval: false
+        replicas: 1
+        variables:
+          - key: env
+            value: test
+          - key: product
+            value: devops
+        kubernetesName: solidk8s
+        kubernetesNamespace: goweb-test
+        configMap:
+          default.conf: |-
+            dlsfjalkejrlkawfewafjelfj
+            awerawejfka;lwekjrlkwe
+            afalkwejrklajwelrjawefe
+            weklrjlwekfjlkewwaerwd
+          default1.conf: |-
+            kdjaflkwejkfdeadenaek
+            aelfnalkewfjkalwe
+            klaenflakewjffefwerwkla
+            kejflakwejflkaejklfajewlkfjalw
+        configMountPath: /etc/config
+  owner: solid

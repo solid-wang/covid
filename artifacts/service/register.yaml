@@ -1,0 +1,9 @@
+---
+apiVersion: service/v1
+kind: DockerRepository
+metadata:
+  name: docker.ssc-hn.com
+spec:
+  host: docker.ssc-hn.com
+  user: admin
+  password: Oxhainan.1234

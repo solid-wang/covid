@@ -13,7 +13,6 @@ import (
 type CoreV1Interface interface {
 	RESTClient() rest.Interface
 	EventsGetter
-	NamespacesGetter
 }
 
 // CoreV1Client is used to interact with features provided by the  group.
@@ -23,10 +22,6 @@ type CoreV1Client struct {
 
 func (c *CoreV1Client) Events(namespace string) EventInterface {
 	return newEvents(c, namespace)
-}
-
-func (c *CoreV1Client) Namespaces() NamespaceInterface {
-	return newNamespaces(c)
 }
 
 // NewForConfig creates a new CoreV1Client for the given config.

@@ -1,54 +1,49 @@
 package apiserver
 
 import (
-	"github.com/solid-wang/covid/pkg/apis/core"
+	appinstall "github.com/solid-wang/covid/pkg/apis/app/install"
+	batchinstall "github.com/solid-wang/covid/pkg/apis/batch/install"
 	coreinstall "github.com/solid-wang/covid/pkg/apis/core/install"
-	"github.com/solid-wang/covid/pkg/apis/example"
-	exampleinstall "github.com/solid-wang/covid/pkg/apis/example/install"
-	"github.com/solid-wang/covid/pkg/apis/group"
-	groupinstall "github.com/solid-wang/covid/pkg/apis/group/install"
-	eventstorage "github.com/solid-wang/covid/pkg/registry/core/event"
-	namespacestorage "github.com/solid-wang/covid/pkg/registry/core/namespace"
+	serviceinstall "github.com/solid-wang/covid/pkg/apis/service/install"
+	"github.com/solid-wang/covid/pkg/generated/clientset/versioned/scheme"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
+	"k8s.io/apiserver/pkg/registry/generic"
 
-	"github.com/solid-wang/covid/pkg/registry"
-	demo1storage "github.com/solid-wang/covid/pkg/registry/example/demo1"
-	demostorage "github.com/solid-wang/covid/pkg/registry/group/demo"
-
+	apprest "github.com/solid-wang/covid/pkg/registry/app/rest"
+	batchrest "github.com/solid-wang/covid/pkg/registry/batch/rest"
+	corerest "github.com/solid-wang/covid/pkg/registry/core/rest"
+	servicerest "github.com/solid-wang/covid/pkg/registry/service/rest"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/version"
-	"k8s.io/apiserver/pkg/registry/rest"
 	genericapiserver "k8s.io/apiserver/pkg/server"
 )
 
-var (
-	// Scheme defines methods for serializing and deserializing API objects.
-	Scheme = runtime.NewScheme()
-	// Codecs provides methods for retrieving codecs and serializers for specific
-	// versions and content types.
-	Codecs = serializer.NewCodecFactory(Scheme)
-)
-
 func init() {
-	coreinstall.Install(Scheme)
-	exampleinstall.Install(Scheme)
-	groupinstall.Install(Scheme)
+	coreinstall.Install(scheme.Scheme)
+	batchinstall.Install(scheme.Scheme)
+	appinstall.Install(scheme.Scheme)
+	serviceinstall.Install(scheme.Scheme)
 
 	// we need to add the options to empty v1
 	// TODO fix the server code to avoid this
-	metav1.AddToGroupVersion(Scheme, schema.GroupVersion{Version: "v1"})
+	metav1.AddToGroupVersion(scheme.Scheme, schema.GroupVersion{Version: "v1"})
 
 	// TODO: keep the generic API server from wanting this
 	unversioned := schema.GroupVersion{Group: "", Version: "v1"}
-	Scheme.AddUnversionedTypes(unversioned,
+	scheme.Scheme.AddUnversionedTypes(unversioned,
 		&metav1.Status{},
 		&metav1.APIVersions{},
 		&metav1.APIGroupList{},
 		&metav1.APIGroup{},
 		&metav1.APIResourceList{},
 	)
+}
+
+type RESTStorageProvider interface {
+	GroupName() string
+	NewRESTStorage(scheme *runtime.Scheme, codes serializer.CodecFactory, restOptionsGetter generic.RESTOptionsGetter) (genericapiserver.APIGroupInfo, error)
 }
 
 // ExtraConfig holds custom apiserver config
@@ -103,33 +98,23 @@ func (c completedConfig) New() (*CovidServer, error) {
 		GenericAPIServer: genericServer,
 	}
 
-	coreGroupInfo := genericapiserver.NewDefaultAPIGroupInfo(core.GroupName, Scheme, metav1.ParameterCodec, Codecs)
-
-	coreGroupInfo.VersionedResourcesStorageMap["v1"] = map[string]rest.Storage{
-		"namespaces": registry.RESTInPeace(namespacestorage.NewREST(Scheme, c.GenericConfig.RESTOptionsGetter)),
-		"events":     registry.RESTInPeace(eventstorage.NewREST(Scheme, c.GenericConfig.RESTOptionsGetter)),
-	}
+	coreStoreProvider := corerest.StorageProvider{}
+	coreGroupInfo, err := coreStoreProvider.NewRESTStorage(c.GenericConfig.RESTOptionsGetter)
 
 	if err := s.GenericAPIServer.InstallLegacyAPIGroup("/api", &coreGroupInfo); err != nil {
 		return nil, err
 	}
 
-	exampleGroupInfo := genericapiserver.NewDefaultAPIGroupInfo(example.GroupName, Scheme, metav1.ParameterCodec, Codecs)
-	groupGroupInfo := genericapiserver.NewDefaultAPIGroupInfo(group.GroupName, Scheme, metav1.ParameterCodec, Codecs)
+	batchStoreProvider := batchrest.StorageProvider{}
+	batchGroupInfo, err := batchStoreProvider.NewRESTStorage(c.GenericConfig.RESTOptionsGetter)
 
-	exampleGroupInfo.VersionedResourcesStorageMap["v1"] = map[string]rest.Storage{
-		"demo1s": registry.RESTInPeace(demo1storage.NewREST(Scheme, c.GenericConfig.RESTOptionsGetter)),
-	}
+	appStoreProvider := apprest.StorageProvider{}
+	appGroupInfo, err := appStoreProvider.NewRESTStorage(c.GenericConfig.RESTOptionsGetter)
 
-	groupGroupInfo.VersionedResourcesStorageMap["v1"] = map[string]rest.Storage{
-		"demos": registry.RESTInPeace(demostorage.NewREST(Scheme, c.GenericConfig.RESTOptionsGetter)),
-	}
+	serviceStoreProvider := servicerest.StorageProvider{}
+	serviceGroupInfo, err := serviceStoreProvider.NewRESTStorage(c.GenericConfig.RESTOptionsGetter)
 
-	groupGroupInfo.VersionedResourcesStorageMap["v1beta1"] = map[string]rest.Storage{
-		"demos": registry.RESTInPeace(demostorage.NewREST(Scheme, c.GenericConfig.RESTOptionsGetter)),
-	}
-
-	if err := s.GenericAPIServer.InstallAPIGroups(&exampleGroupInfo, &groupGroupInfo); err != nil {
+	if err := s.GenericAPIServer.InstallAPIGroups(&batchGroupInfo, &appGroupInfo, &serviceGroupInfo); err != nil {
 		return nil, err
 	}
 

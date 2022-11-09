@@ -2,11 +2,12 @@ package app
 
 import (
 	"context"
+	appv1 "github.com/solid-wang/covid/pkg/apis/app/v1"
+	batchv1 "github.com/solid-wang/covid/pkg/apis/batch/v1"
 	corev1 "github.com/solid-wang/covid/pkg/apis/core/v1"
-	examplev1 "github.com/solid-wang/covid/pkg/apis/example/v1"
-	groupv1 "github.com/solid-wang/covid/pkg/apis/group/v1"
-	groupv1beta1 "github.com/solid-wang/covid/pkg/apis/group/v1beta1"
+	servicev1 "github.com/solid-wang/covid/pkg/apis/service/v1"
 	"github.com/solid-wang/covid/pkg/apiserver"
+	"github.com/solid-wang/covid/pkg/generated/clientset/versioned/scheme"
 	informers "github.com/solid-wang/covid/pkg/generated/informers/externalversions"
 	covidopenapi "github.com/solid-wang/covid/pkg/generated/openapi"
 	"github.com/spf13/cobra"
@@ -21,7 +22,6 @@ import (
 	"k8s.io/klog/v2"
 	"net/http"
 	"os"
-	"time"
 )
 
 const defaultEtcdPathPrefix = "/registry/covid"
@@ -40,15 +40,15 @@ func NewCovidServerOptions(out, errOut io.Writer) *CovidServerOptions {
 
 	groupVersioners := schema.GroupVersions{
 		corev1.SchemeGroupVersion,
-		examplev1.SchemeGroupVersion,
-		groupv1.SchemeGroupVersion,
-		groupv1beta1.SchemeGroupVersion,
+		appv1.SchemeGroupVersion,
+		batchv1.SchemeGroupVersion,
+		servicev1.SchemeGroupVersion,
 	}
 
 	o := &CovidServerOptions{
 		RecommendedOptions: genericoptions.NewRecommendedOptions(
 			defaultEtcdPathPrefix,
-			apiserver.Codecs.LegacyCodec(groupVersioners...),
+			scheme.Codecs.LegacyCodec(groupVersioners...),
 		),
 
 		StdOut: out,
@@ -82,14 +82,14 @@ func NewCommandStartCovidServer(defaults *CovidServerOptions, stopCh <-chan stru
 
 	flags := cmd.Flags()
 	o.RecommendedOptions.AddFlags(flags)
-	utilfeature.DefaultMutableFeatureGate.AddFlag(flags)
+	//utilfeature.DefaultMutableFeatureGate.AddFlag(flags)
 
 	return cmd
 }
 
 // Validate validates CovidServerOptions
-func (o CovidServerOptions) Validate(args []string) error {
-	errors := []error{}
+func (o *CovidServerOptions) Validate(args []string) error {
+	var errors []error
 	errors = append(errors, o.RecommendedOptions.Validate()...)
 	return utilerrors.NewAggregate(errors)
 }
@@ -109,14 +109,14 @@ func (o *CovidServerOptions) Config() (*apiserver.Config, error) {
 	o.RecommendedOptions.CoreAPI = nil
 	o.RecommendedOptions.Admission = nil
 
-	serverConfig := genericapiserver.NewRecommendedConfig(apiserver.Codecs)
+	serverConfig := genericapiserver.NewRecommendedConfig(scheme.Codecs)
 
-	serverConfig.OpenAPIConfig = genericapiserver.DefaultOpenAPIConfig(covidopenapi.GetOpenAPIDefinitions, openapi.NewDefinitionNamer(apiserver.Scheme))
+	serverConfig.OpenAPIConfig = genericapiserver.DefaultOpenAPIConfig(covidopenapi.GetOpenAPIDefinitions, openapi.NewDefinitionNamer(scheme.Scheme))
 	serverConfig.OpenAPIConfig.Info.Title = "Covid"
 	serverConfig.OpenAPIConfig.Info.Version = "1.0"
 
 	if utilfeature.DefaultFeatureGate.Enabled(features.OpenAPIV3) {
-		serverConfig.OpenAPIV3Config = genericapiserver.DefaultOpenAPIV3Config(covidopenapi.GetOpenAPIDefinitions, openapi.NewDefinitionNamer(apiserver.Scheme))
+		serverConfig.OpenAPIV3Config = genericapiserver.DefaultOpenAPIV3Config(covidopenapi.GetOpenAPIDefinitions, openapi.NewDefinitionNamer(scheme.Scheme))
 		serverConfig.OpenAPIV3Config.Info.Title = "Covid"
 		serverConfig.OpenAPIV3Config.Info.Version = "1.0"
 	}
@@ -133,7 +133,7 @@ func (o *CovidServerOptions) Config() (*apiserver.Config, error) {
 }
 
 // RunCovidServer starts a new CovidServer given CovidServerOptions
-func (o CovidServerOptions) RunCovidServer(stopCh <-chan struct{}) error {
+func (o *CovidServerOptions) RunCovidServer(stopCh <-chan struct{}) error {
 	config, err := o.Config()
 	if err != nil {
 		return err
@@ -145,10 +145,8 @@ func (o CovidServerOptions) RunCovidServer(stopCh <-chan struct{}) error {
 	}
 
 	httpServer := &http.Server{
-		Addr:         ":8080",
-		Handler:      server.GenericAPIServer.PrepareRun().Handler,
-		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 5 * time.Second,
+		Addr:    ":8080",
+		Handler: server.GenericAPIServer.PrepareRun().Handler,
 	}
 
 	go func() {

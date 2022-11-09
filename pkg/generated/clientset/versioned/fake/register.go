@@ -3,10 +3,10 @@
 package fake
 
 import (
+	appv1 "github.com/solid-wang/covid/pkg/apis/app/v1"
+	batchv1 "github.com/solid-wang/covid/pkg/apis/batch/v1"
 	corev1 "github.com/solid-wang/covid/pkg/apis/core/v1"
-	examplev1 "github.com/solid-wang/covid/pkg/apis/example/v1"
-	groupv1 "github.com/solid-wang/covid/pkg/apis/group/v1"
-	groupv1beta1 "github.com/solid-wang/covid/pkg/apis/group/v1beta1"
+	servicev1 "github.com/solid-wang/covid/pkg/apis/service/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
@@ -18,10 +18,10 @@ var scheme = runtime.NewScheme()
 var codecs = serializer.NewCodecFactory(scheme)
 
 var localSchemeBuilder = runtime.SchemeBuilder{
+	appv1.AddToScheme,
+	batchv1.AddToScheme,
 	corev1.AddToScheme,
-	examplev1.AddToScheme,
-	groupv1.AddToScheme,
-	groupv1beta1.AddToScheme,
+	servicev1.AddToScheme,
 }
 
 // AddToScheme adds all types of this clientset into the given scheme. This allows composition

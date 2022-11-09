@@ -1,0 +1,5 @@
+---
+apiVersion: batch/v1
+kind: ContinuousIntegration
+metadata:
+  name: goweb

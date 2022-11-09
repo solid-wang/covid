@@ -16,10 +16,6 @@ func (c *FakeCoreV1) Events(namespace string) v1.EventInterface {
 	return &FakeEvents{c, namespace}
 }
 
-func (c *FakeCoreV1) Namespaces() v1.NamespaceInterface {
-	return &FakeNamespaces{c}
-}
-
 // RESTClient returns a RESTClient that is used to communicate
 // with API server by this client implementation.
 func (c *FakeCoreV1) RESTClient() rest.Interface {

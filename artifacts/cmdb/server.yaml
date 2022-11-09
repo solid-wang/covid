@@ -1,0 +1,21 @@
+---
+apiVersion: cmdb/v1
+kind: Server
+metadata:
+  name: goweb
+spec:
+  gitlabName: "gitlab"
+  gitlabProjectID: 331
+  ciConfigPath: ".gitlab-ci.yml@ops/go-ci"
+  buildImage: "golang:latest"
+  fromImage: "ubuntu:22.04"
+  buildDir: "./"
+  buildCommand: "export GOPROXY=https://goproxy.cn,direct && go build -o ./goweb"
+  artifactPath: "./goweb"
+  image: "docker.ssc-hn.com/devops/goweb"
+  branchMap:
+    main:
+      approval: false
+      env: test
+      kubernetesName: solid-test
+      kubernetesNamespace: goweb-test

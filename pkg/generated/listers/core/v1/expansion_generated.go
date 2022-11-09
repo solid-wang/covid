@@ -9,7 +9,3 @@ type EventListerExpansion interface{}
 // EventNamespaceListerExpansion allows custom methods to be added to
 // EventNamespaceLister.
 type EventNamespaceListerExpansion interface{}
-
-// NamespaceListerExpansion allows custom methods to be added to
-// NamespaceLister.
-type NamespaceListerExpansion interface{}

@@ -1,0 +1,8 @@
+---
+apiVersion: cmdb/v1
+kind: Gitlab
+metadata:
+  name: gitlab
+spec:
+  url: "gitlab.ssc-hn.com"
+  token: ""

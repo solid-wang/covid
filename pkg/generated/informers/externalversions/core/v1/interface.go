@@ -10,8 +10,6 @@ import (
 type Interface interface {
 	// Events returns a EventInformer.
 	Events() EventInformer
-	// Namespaces returns a NamespaceInformer.
-	Namespaces() NamespaceInformer
 }
 
 type version struct {
@@ -28,9 +26,4 @@ func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakList
 // Events returns a EventInformer.
 func (v *version) Events() EventInformer {
 	return &eventInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
-}
-
-// Namespaces returns a NamespaceInformer.
-func (v *version) Namespaces() NamespaceInformer {
-	return &namespaceInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
 }

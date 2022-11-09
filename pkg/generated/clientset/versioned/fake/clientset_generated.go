@@ -4,14 +4,14 @@ package fake
 
 import (
 	clientset "github.com/solid-wang/covid/pkg/generated/clientset/versioned"
+	appv1 "github.com/solid-wang/covid/pkg/generated/clientset/versioned/typed/app/v1"
+	fakeappv1 "github.com/solid-wang/covid/pkg/generated/clientset/versioned/typed/app/v1/fake"
+	batchv1 "github.com/solid-wang/covid/pkg/generated/clientset/versioned/typed/batch/v1"
+	fakebatchv1 "github.com/solid-wang/covid/pkg/generated/clientset/versioned/typed/batch/v1/fake"
 	corev1 "github.com/solid-wang/covid/pkg/generated/clientset/versioned/typed/core/v1"
 	fakecorev1 "github.com/solid-wang/covid/pkg/generated/clientset/versioned/typed/core/v1/fake"
-	examplev1 "github.com/solid-wang/covid/pkg/generated/clientset/versioned/typed/example/v1"
-	fakeexamplev1 "github.com/solid-wang/covid/pkg/generated/clientset/versioned/typed/example/v1/fake"
-	groupv1 "github.com/solid-wang/covid/pkg/generated/clientset/versioned/typed/group/v1"
-	fakegroupv1 "github.com/solid-wang/covid/pkg/generated/clientset/versioned/typed/group/v1/fake"
-	groupv1beta1 "github.com/solid-wang/covid/pkg/generated/clientset/versioned/typed/group/v1beta1"
-	fakegroupv1beta1 "github.com/solid-wang/covid/pkg/generated/clientset/versioned/typed/group/v1beta1/fake"
+	servicev1 "github.com/solid-wang/covid/pkg/generated/clientset/versioned/typed/service/v1"
+	fakeservicev1 "github.com/solid-wang/covid/pkg/generated/clientset/versioned/typed/service/v1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"
@@ -69,22 +69,22 @@ var (
 	_ testing.FakeClient  = &Clientset{}
 )
 
+// AppV1 retrieves the AppV1Client
+func (c *Clientset) AppV1() appv1.AppV1Interface {
+	return &fakeappv1.FakeAppV1{Fake: &c.Fake}
+}
+
+// BatchV1 retrieves the BatchV1Client
+func (c *Clientset) BatchV1() batchv1.BatchV1Interface {
+	return &fakebatchv1.FakeBatchV1{Fake: &c.Fake}
+}
+
 // CoreV1 retrieves the CoreV1Client
 func (c *Clientset) CoreV1() corev1.CoreV1Interface {
 	return &fakecorev1.FakeCoreV1{Fake: &c.Fake}
 }
 
-// ExampleV1 retrieves the ExampleV1Client
-func (c *Clientset) ExampleV1() examplev1.ExampleV1Interface {
-	return &fakeexamplev1.FakeExampleV1{Fake: &c.Fake}
-}
-
-// GroupV1 retrieves the GroupV1Client
-func (c *Clientset) GroupV1() groupv1.GroupV1Interface {
-	return &fakegroupv1.FakeGroupV1{Fake: &c.Fake}
-}
-
-// GroupV1beta1 retrieves the GroupV1beta1Client
-func (c *Clientset) GroupV1beta1() groupv1beta1.GroupV1beta1Interface {
-	return &fakegroupv1beta1.FakeGroupV1beta1{Fake: &c.Fake}
+// ServiceV1 retrieves the ServiceV1Client
+func (c *Clientset) ServiceV1() servicev1.ServiceV1Interface {
+	return &fakeservicev1.FakeServiceV1{Fake: &c.Fake}
 }

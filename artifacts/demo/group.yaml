@@ -3,6 +3,8 @@ apiVersion: group/v1
 kind: Demo
 metadata:
   name: testdemo
-  namespace: test
 spec:
   v1: adfer332
+
+
+

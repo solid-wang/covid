@@ -8,10 +8,11 @@ import (
 	time "time"
 
 	versioned "github.com/solid-wang/covid/pkg/generated/clientset/versioned"
+	app "github.com/solid-wang/covid/pkg/generated/informers/externalversions/app"
+	batch "github.com/solid-wang/covid/pkg/generated/informers/externalversions/batch"
 	core "github.com/solid-wang/covid/pkg/generated/informers/externalversions/core"
-	example "github.com/solid-wang/covid/pkg/generated/informers/externalversions/example"
-	group "github.com/solid-wang/covid/pkg/generated/informers/externalversions/group"
 	internalinterfaces "github.com/solid-wang/covid/pkg/generated/informers/externalversions/internalinterfaces"
+	service "github.com/solid-wang/covid/pkg/generated/informers/externalversions/service"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
@@ -158,19 +159,24 @@ type SharedInformerFactory interface {
 	ForResource(resource schema.GroupVersionResource) (GenericInformer, error)
 	WaitForCacheSync(stopCh <-chan struct{}) map[reflect.Type]bool
 
+	App() app.Interface
+	Batch() batch.Interface
 	Core() core.Interface
-	Example() example.Interface
-	Group() group.Interface
+	Service() service.Interface
+}
+
+func (f *sharedInformerFactory) App() app.Interface {
+	return app.New(f, f.namespace, f.tweakListOptions)
+}
+
+func (f *sharedInformerFactory) Batch() batch.Interface {
+	return batch.New(f, f.namespace, f.tweakListOptions)
 }
 
 func (f *sharedInformerFactory) Core() core.Interface {
 	return core.New(f, f.namespace, f.tweakListOptions)
 }
 
-func (f *sharedInformerFactory) Example() example.Interface {
-	return example.New(f, f.namespace, f.tweakListOptions)
-}
-
-func (f *sharedInformerFactory) Group() group.Interface {
-	return group.New(f, f.namespace, f.tweakListOptions)
+func (f *sharedInformerFactory) Service() service.Interface {
+	return service.New(f, f.namespace, f.tweakListOptions)
 }

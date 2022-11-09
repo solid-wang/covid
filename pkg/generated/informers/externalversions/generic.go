@@ -5,10 +5,10 @@ package externalversions
 import (
 	"fmt"
 
-	v1 "github.com/solid-wang/covid/pkg/apis/core/v1"
-	examplev1 "github.com/solid-wang/covid/pkg/apis/example/v1"
-	groupv1 "github.com/solid-wang/covid/pkg/apis/group/v1"
-	v1beta1 "github.com/solid-wang/covid/pkg/apis/group/v1beta1"
+	v1 "github.com/solid-wang/covid/pkg/apis/app/v1"
+	batchv1 "github.com/solid-wang/covid/pkg/apis/batch/v1"
+	corev1 "github.com/solid-wang/covid/pkg/apis/core/v1"
+	servicev1 "github.com/solid-wang/covid/pkg/apis/service/v1"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	cache "k8s.io/client-go/tools/cache"
 )
@@ -39,23 +39,29 @@ func (f *genericInformer) Lister() cache.GenericLister {
 // TODO extend this to unknown resources with a client pool
 func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource) (GenericInformer, error) {
 	switch resource {
-	// Group=core, Version=v1
-	case v1.SchemeGroupVersion.WithResource("events"):
+	// Group=app, Version=v1
+	case v1.SchemeGroupVersion.WithResource("applications"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.App().V1().Applications().Informer()}, nil
+	case v1.SchemeGroupVersion.WithResource("products"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.App().V1().Products().Informer()}, nil
+
+		// Group=batch, Version=v1
+	case batchv1.SchemeGroupVersion.WithResource("continuousdeployments"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Batch().V1().ContinuousDeployments().Informer()}, nil
+	case batchv1.SchemeGroupVersion.WithResource("continuousintegrations"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Batch().V1().ContinuousIntegrations().Informer()}, nil
+
+		// Group=core, Version=v1
+	case corev1.SchemeGroupVersion.WithResource("events"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Core().V1().Events().Informer()}, nil
-	case v1.SchemeGroupVersion.WithResource("namespaces"):
-		return &genericInformer{resource: resource.GroupResource(), informer: f.Core().V1().Namespaces().Informer()}, nil
 
-		// Group=example, Version=v1
-	case examplev1.SchemeGroupVersion.WithResource("demo1s"):
-		return &genericInformer{resource: resource.GroupResource(), informer: f.Example().V1().Demo1s().Informer()}, nil
-
-		// Group=group, Version=v1
-	case groupv1.SchemeGroupVersion.WithResource("demos"):
-		return &genericInformer{resource: resource.GroupResource(), informer: f.Group().V1().Demos().Informer()}, nil
-
-		// Group=group, Version=v1beta1
-	case v1beta1.SchemeGroupVersion.WithResource("demos"):
-		return &genericInformer{resource: resource.GroupResource(), informer: f.Group().V1beta1().Demos().Informer()}, nil
+		// Group=service, Version=v1
+	case servicev1.SchemeGroupVersion.WithResource("dockerrepositories"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Service().V1().DockerRepositories().Informer()}, nil
+	case servicev1.SchemeGroupVersion.WithResource("gitlabs"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Service().V1().Gitlabs().Informer()}, nil
+	case servicev1.SchemeGroupVersion.WithResource("kuberneteses"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Service().V1().Kuberneteses().Informer()}, nil
 
 	}
 

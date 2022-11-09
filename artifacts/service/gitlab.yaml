@@ -1,0 +1,8 @@
+---
+apiVersion: service/v1
+kind: Gitlab
+metadata:
+  name: gitlab.ssc-hn.com
+spec:
+  host: https://gitlab.ssc-hn.com
+  token: "Rxmr4v7DYdR2KDzPfyzk"

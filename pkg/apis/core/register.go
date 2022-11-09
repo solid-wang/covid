@@ -54,8 +54,6 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 	scheme.AddKnownTypes(SchemeGroupVersion,
 		&Event{},
 		&EventList{},
-		&Namespace{},
-		&NamespaceList{},
 	)
 
 	return nil

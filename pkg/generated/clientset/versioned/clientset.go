@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"net/http"
 
+	appv1 "github.com/solid-wang/covid/pkg/generated/clientset/versioned/typed/app/v1"
+	batchv1 "github.com/solid-wang/covid/pkg/generated/clientset/versioned/typed/batch/v1"
 	corev1 "github.com/solid-wang/covid/pkg/generated/clientset/versioned/typed/core/v1"
-	examplev1 "github.com/solid-wang/covid/pkg/generated/clientset/versioned/typed/example/v1"
-	groupv1 "github.com/solid-wang/covid/pkg/generated/clientset/versioned/typed/group/v1"
-	groupv1beta1 "github.com/solid-wang/covid/pkg/generated/clientset/versioned/typed/group/v1beta1"
+	servicev1 "github.com/solid-wang/covid/pkg/generated/clientset/versioned/typed/service/v1"
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
 	flowcontrol "k8s.io/client-go/util/flowcontrol"
@@ -17,20 +17,30 @@ import (
 
 type Interface interface {
 	Discovery() discovery.DiscoveryInterface
+	AppV1() appv1.AppV1Interface
+	BatchV1() batchv1.BatchV1Interface
 	CoreV1() corev1.CoreV1Interface
-	ExampleV1() examplev1.ExampleV1Interface
-	GroupV1() groupv1.GroupV1Interface
-	GroupV1beta1() groupv1beta1.GroupV1beta1Interface
+	ServiceV1() servicev1.ServiceV1Interface
 }
 
 // Clientset contains the clients for groups. Each group has exactly one
 // version included in a Clientset.
 type Clientset struct {
 	*discovery.DiscoveryClient
-	coreV1       *corev1.CoreV1Client
-	exampleV1    *examplev1.ExampleV1Client
-	groupV1      *groupv1.GroupV1Client
-	groupV1beta1 *groupv1beta1.GroupV1beta1Client
+	appV1     *appv1.AppV1Client
+	batchV1   *batchv1.BatchV1Client
+	coreV1    *corev1.CoreV1Client
+	serviceV1 *servicev1.ServiceV1Client
+}
+
+// AppV1 retrieves the AppV1Client
+func (c *Clientset) AppV1() appv1.AppV1Interface {
+	return c.appV1
+}
+
+// BatchV1 retrieves the BatchV1Client
+func (c *Clientset) BatchV1() batchv1.BatchV1Interface {
+	return c.batchV1
 }
 
 // CoreV1 retrieves the CoreV1Client
@@ -38,19 +48,9 @@ func (c *Clientset) CoreV1() corev1.CoreV1Interface {
 	return c.coreV1
 }
 
-// ExampleV1 retrieves the ExampleV1Client
-func (c *Clientset) ExampleV1() examplev1.ExampleV1Interface {
-	return c.exampleV1
-}
-
-// GroupV1 retrieves the GroupV1Client
-func (c *Clientset) GroupV1() groupv1.GroupV1Interface {
-	return c.groupV1
-}
-
-// GroupV1beta1 retrieves the GroupV1beta1Client
-func (c *Clientset) GroupV1beta1() groupv1beta1.GroupV1beta1Interface {
-	return c.groupV1beta1
+// ServiceV1 retrieves the ServiceV1Client
+func (c *Clientset) ServiceV1() servicev1.ServiceV1Interface {
+	return c.serviceV1
 }
 
 // Discovery retrieves the DiscoveryClient
@@ -97,19 +97,19 @@ func NewForConfigAndClient(c *rest.Config, httpClient *http.Client) (*Clientset,
 
 	var cs Clientset
 	var err error
+	cs.appV1, err = appv1.NewForConfigAndClient(&configShallowCopy, httpClient)
+	if err != nil {
+		return nil, err
+	}
+	cs.batchV1, err = batchv1.NewForConfigAndClient(&configShallowCopy, httpClient)
+	if err != nil {
+		return nil, err
+	}
 	cs.coreV1, err = corev1.NewForConfigAndClient(&configShallowCopy, httpClient)
 	if err != nil {
 		return nil, err
 	}
-	cs.exampleV1, err = examplev1.NewForConfigAndClient(&configShallowCopy, httpClient)
-	if err != nil {
-		return nil, err
-	}
-	cs.groupV1, err = groupv1.NewForConfigAndClient(&configShallowCopy, httpClient)
-	if err != nil {
-		return nil, err
-	}
-	cs.groupV1beta1, err = groupv1beta1.NewForConfigAndClient(&configShallowCopy, httpClient)
+	cs.serviceV1, err = servicev1.NewForConfigAndClient(&configShallowCopy, httpClient)
 	if err != nil {
 		return nil, err
 	}
@@ -134,10 +134,10 @@ func NewForConfigOrDie(c *rest.Config) *Clientset {
 // New creates a new Clientset for the given RESTClient.
 func New(c rest.Interface) *Clientset {
 	var cs Clientset
+	cs.appV1 = appv1.New(c)
+	cs.batchV1 = batchv1.New(c)
 	cs.coreV1 = corev1.New(c)
-	cs.exampleV1 = examplev1.New(c)
-	cs.groupV1 = groupv1.New(c)
-	cs.groupV1beta1 = groupv1beta1.New(c)
+	cs.serviceV1 = servicev1.New(c)
 
 	cs.DiscoveryClient = discovery.NewDiscoveryClient(c)
 	return &cs
